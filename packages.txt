@@ -1,4 +1,0 @@
-# System packages for Streamlit Cloud / HuggingFace (if needed)
-# Uncomment if your host doesn't provide them:
-# ffmpeg
-# libgl1-mesa-glx
