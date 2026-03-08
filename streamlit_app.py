@@ -32,7 +32,7 @@ except Exception:
     GroqAuthError = Exception
 
 st.set_page_config(page_title="Math Mentor", page_icon="📐", layout="wide")
-st.title("📐 Math Mentor")
+st.title("AI Math Mentor")
 st.caption("JEE-style math: Algebra, Probability, Calculus, Linear Algebra. Multimodal input + RAG + Agents + HITL + Memory.")
 
 if "trace" not in st.session_state:
