@@ -25,3 +25,14 @@
 - f'(x) = 0 ⇒ critical point(s).
 - Compare f at critical points and endpoints; state max or min.
 - Answer with units.
+
+## Calculus – Limits template
+- Identify form (finite limit, ∞, or 0/0, ∞/∞ indeterminate). For rational at ∞: divide by highest power of x.
+- For 0/0 or ∞/∞: simplify or use L’Hôpital (differentiate num and den); repeat if needed. Check left/right if limit at a point.
+
+## Calculus – Derivatives template
+- Use sum/product/quotient/chain rule. Chain rule: derivative of outer × derivative of inner. State final derivative clearly.
+
+## Calculus – Integrals template
+- Indefinite: identify standard form, or substitution u = g(x), or integration by parts (∫ u dv = uv - ∫ v du). Do not forget + C.
+- Definite: find antiderivative F; then ∫_a^b f = F(b) - F(a). If substitution, either change limits to u or substitute back before evaluating.
