@@ -86,7 +86,7 @@ def _normalize_math_phrases(s: str) -> str:
     s = s.replace(" integral ", " ∫ ")
     s = s.replace(" summation ", " Σ ")
     s = s.replace(" product ", " Π ")
-    s = s.replace(" derivative ", " ′ ")
+    s = s.replace(" derivative ", " d/dx ")
     s = s.replace(" quotient ", " / ")
     s = s.replace(" logarithm ", " log ")
     s = s.replace(" exponential ", " exp ")
