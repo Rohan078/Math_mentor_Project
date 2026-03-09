@@ -90,14 +90,20 @@ elif input_mode == "Image":
     uploaded = st.file_uploader("Upload problem image (JPG/PNG)", type=["jpg", "jpeg", "png"])
     st.caption("Uses Groq Vision LLM for math symbols (Σ, √, ∫); falls back to EasyOCR if needed.")
     if uploaded:
-        if st.session_state.get("_ocr_file") != uploaded.name:
+        file_id = (uploaded.name, uploaded.size)
+        if st.session_state.get("_ocr_file_id") != file_id:
             temp_path = DATA_DIR / f"upload_{uploaded.name}"
             temp_path.write_bytes(uploaded.getvalue())
             ocr_text, ocr_conf_val = extract_text_from_image(temp_path)
+            st.session_state._ocr_file_id = file_id
             st.session_state._ocr_file = uploaded.name
             st.session_state._ocr_text = ocr_text or ""
             st.session_state._ocr_conf = ocr_conf_val
         st.image(uploaded, use_container_width=True, caption="Uploaded image")
+    else:
+        if "_ocr_file_id" in st.session_state:
+            for k in ("_ocr_file_id", "_ocr_file", "_ocr_text", "_ocr_conf"):
+                st.session_state.pop(k, None)
 
     if st.session_state.get("_ocr_text") is not None:
         ocr_conf = st.session_state.get("_ocr_conf", 1.0)
@@ -130,10 +136,12 @@ elif input_mode == "Audio":
     else:
         uploaded_audio = st.file_uploader("Upload audio (e.g. MP3, WAV)", type=["mp3", "wav", "m4a", "ogg", "webm"])
         if uploaded_audio:
-            if st.session_state.get("_asr_file") != uploaded_audio.name:
+            file_id = (uploaded_audio.name, uploaded_audio.size)
+            if st.session_state.get("_asr_file_id") != file_id:
                 temp_path = DATA_DIR / f"audio_{uploaded_audio.name}"
                 temp_path.write_bytes(uploaded_audio.getvalue())
                 asr_text, asr_conf_val = transcribe_audio(temp_path)
+                st.session_state._asr_file_id = file_id
                 st.session_state._asr_file = uploaded_audio.name
                 st.session_state._asr_text = asr_text or ""
                 st.session_state._asr_conf = asr_conf_val
