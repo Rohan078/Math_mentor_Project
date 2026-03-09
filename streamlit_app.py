@@ -24,7 +24,7 @@ from app.agents.explainer import explain_solution, ExplainerResult
 from app.multimodal.ocr import extract_text_from_image, ocr_confidence_low
 from app.multimodal.asr import transcribe_audio, asr_confidence_low
 from app.hitl import should_trigger_hitl
-from app.memory import store, retrieve_similar
+from app.memory import store, retrieve_similar, get_correction_rules
 
 try:
     from groq import AuthenticationError as GroqAuthError
@@ -184,15 +184,18 @@ if st.button("Solve", type="primary") and raw_text:
             add_trace("HITL", hitl_reason)
 
         similar = retrieve_similar(parsed.problem_text, top_k=2)
+        correction_rules = get_correction_rules(limit=10)
         if similar:
             add_trace("Memory", f"Found {len(similar)} similar past solution(s)")
+        if correction_rules:
+            add_trace("Memory", f"Using {len(correction_rules)} past correction(s) to improve answer")
 
         add_trace("Intent Router", "Classifying problem and choosing strategy")
         intent = route_intent(parsed)
         add_trace("Intent Router", f"Intent: {intent.intent}, Strategy: {intent.strategy}")
 
-        add_trace("Solver Agent", "Retrieving context and solving")
-        solver_result = solve_problem(parsed, intent)
+        add_trace("Solver Agent", "Retrieving context and solving (with past feedback)")
+        solver_result = solve_problem(parsed, intent, similar_sessions=similar, correction_rules=correction_rules)
         add_trace("Solver Agent", f"Answer found. Context chunks used: {len(solver_result.context_used)}")
 
         add_trace("Verifier Agent", "Checking correctness and confidence")

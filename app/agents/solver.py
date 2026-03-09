@@ -1,6 +1,6 @@
 """Solver Agent: solves using RAG context and optional Python execution."""
 import re
-from typing import List
+from typing import List, Optional
 
 from app.agents.parser import ParsedProblem
 from app.agents.router import IntentResult
@@ -39,13 +39,47 @@ def _safe_python_calc(expr: str) -> str:
         return ""
 
 
-def solve_problem(parsed: ParsedProblem, intent: IntentResult, top_k: int = 5) -> SolverResult:
-    """Solve using RAG retrieval + LLM. Optionally use Python for numeric evaluation."""
+def _format_memory_context(similar_sessions: Optional[List[dict]] = None, correction_rules: Optional[List[dict]] = None) -> str:
+    """Format similar past sessions and past corrections for the solver prompt."""
+    parts = []
+    if correction_rules:
+        parts.append("Past corrections (user said the model was wrong; use these to avoid repeating mistakes):")
+        for i, r in enumerate(correction_rules[-5:], 1):
+            snippet = (r.get("problem_snippet") or "").strip() or "(similar problem)"
+            orig = r.get("original_answer") or ""
+            corr = r.get("corrected_answer") or ""
+            comment = r.get("user_comment") or ""
+            line = f"- Problem like: \"{snippet[:120]}...\". Model had said: {orig[:80]}. Correct answer: {corr[:80]}." + (f" User note: {comment[:60]}." if comment else "")
+            parts.append(line)
+        parts.append("")
+    if similar_sessions:
+        parts.append("Similar past problems (for reference; match method and style when appropriate):")
+        for s in similar_sessions[:3]:
+            pt = (s.get("parsed_question") or {}).get("problem_text", "")[:150]
+            ans = s.get("final_answer", "")[:100]
+            fb = s.get("user_feedback", "")
+            if pt or ans:
+                parts.append(f"- Past: \"{pt}...\" → Answer: {ans}. Feedback: {fb or 'stored'}.")
+        parts.append("")
+    return "\n".join(parts) if parts else ""
+
+
+def solve_problem(
+    parsed: ParsedProblem,
+    intent: IntentResult,
+    top_k: int = 5,
+    similar_sessions: Optional[List[dict]] = None,
+    correction_rules: Optional[List[dict]] = None,
+) -> SolverResult:
+    """Solve using RAG retrieval + LLM. Uses past similar sessions and correction rules to learn from feedback."""
     context_chunks = retrieve(parsed.problem_text, top_k=top_k)
     context_used = context_chunks
     context_str = "\n\n".join([c["content"] for c in context_chunks]) if context_chunks else "No retrieved context."
 
-    user_msg = f"""Solve this math problem. Use the retrieved knowledge below only when relevant; do not cite if not used.
+    memory_block = _format_memory_context(similar_sessions=similar_sessions, correction_rules=correction_rules)
+    memory_section = f"\nLearning from past feedback (use to avoid repeating mistakes):\n{memory_block}\n" if memory_block else ""
+
+    user_msg = f"""Solve this math problem. Use the retrieved knowledge below only when relevant; do not cite if not used.{memory_section}
 
 Retrieved knowledge:
 {context_str}
@@ -62,7 +96,7 @@ Provide:
 If you need to compute a number, you can output a line like: CALC: <expression> and the system will substitute the result. Otherwise solve symbolically."""
 
     response = chat([
-        {"role": "system", "content": "You are a precise math tutor. Give correct, step-by-step solutions. Use the retrieved context only when it applies; do not invent citations."},
+        {"role": "system", "content": "You are a precise math tutor. Give correct, step-by-step solutions. Use the retrieved context only when it applies; do not invent citations. When past corrections or similar problems are provided, avoid repeating past mistakes and align with user-corrected answers when the problem is similar."},
         {"role": "user", "content": user_msg},
     ])
 

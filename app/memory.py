@@ -103,3 +103,18 @@ def retrieve_similar(problem_text: str, top_k: int = 3) -> list[dict]:
         return [by_id[i] for i in top_ids if i in by_id]
     except Exception:
         return []
+
+
+def get_correction_rules(limit: int = 20) -> list[dict]:
+    """Past cases where user said incorrect and gave correction. Used so the solver can avoid repeating mistakes."""
+    mem_lines = _load_memory_lines()
+    rules = []
+    for r in mem_lines:
+        if r.get("user_feedback") == "incorrect" and (r.get("user_comment") or r.get("corrected_answer")):
+            rules.append({
+                "problem_snippet": (r.get("parsed_question") or {}).get("problem_text", "")[:200],
+                "original_answer": r.get("final_answer", ""),
+                "corrected_answer": r.get("corrected_answer"),
+                "user_comment": r.get("user_comment"),
+            })
+    return rules[-limit:]
