@@ -70,7 +70,11 @@ def store(
     return record_id
 
 
-def retrieve_similar(problem_text: str, top_k: int = 3) -> list[dict]:
+MIN_SIMILARITY_THRESHOLD = 0.55
+
+
+def retrieve_similar(problem_text: str, top_k: int = 3, min_similarity: float = MIN_SIMILARITY_THRESHOLD) -> list[dict]:
+    """Return past sessions whose embedding similarity to problem_text is >= min_similarity. Avoids showing 'similar' for unrelated queries."""
     mem_lines = _load_memory_lines()
     if not mem_lines:
         return []
@@ -94,11 +98,12 @@ def retrieve_similar(problem_text: str, top_k: int = 3) -> list[dict]:
             norm_q = sum(x * x for x in q_emb) ** 0.5
             norm_e = sum(x * x for x in e) ** 0.5
             if norm_q and norm_e:
-                scores.append((ids[i], dot / (norm_q * norm_e)))
+                sim = dot / (norm_q * norm_e)
+                scores.append((ids[i], sim))
             else:
                 scores.append((ids[i], 0))
         scores.sort(key=lambda x: -x[1])
-        top_ids = [s[0] for s in scores[:top_k]]
+        top_ids = [s[0] for s in scores[:top_k] if s[1] >= min_similarity]
         by_id = {r["id"]: r for r in mem_lines}
         return [by_id[i] for i in top_ids if i in by_id]
     except Exception:

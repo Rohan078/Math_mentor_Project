@@ -287,8 +287,9 @@ if st.session_state.result:
         st.subheader("Final answer")
         st.markdown(f"**{solver_result.answer}**")
         st.subheader("Confidence")
-        conf = verification.confidence
-        st.progress(conf)
+        conf = max(0.0, min(1.0, float(verification.confidence)))
+        pct = min(100, max(0, int(round(conf * 100))))
+        st.progress(pct)
         st.caption(f"{conf:.0%}")
         if verification.issues:
             st.caption("Issues: " + "; ".join(verification.issues))
