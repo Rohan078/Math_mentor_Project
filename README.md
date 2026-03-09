@@ -11,6 +11,16 @@ JEE-style math mentor: **Algebra**, **Probability**, **Calculus**, **Linear alge
 - **HITL**: Triggered on low OCR/ASR confidence, parser ambiguity, verifier low confidence, or user “re-check”. Approve/edit/reject; corrections stored as learning signals.
 - **Memory**: Stores input, parsed question, context, answer, verifier outcome, feedback. Similar-problem retrieval and correction rules for reuse.
 
+## Deliverables
+
+| Item | Link |
+|------|------|
+| **Live app** | _Add your Streamlit Cloud URL_ |
+| **Demo video (3–5 min)** | _Add YouTube / Loom link: image → solution, audio → solution, HITL, memory reuse_ |
+| **Architecture** | [ARCHITECTURE.md](ARCHITECTURE.md) (Mermaid diagrams) |
+| **Evaluation** | [EVALUATION.md](EVALUATION.md) |
+| **Checklist** | [DELIVERABLES.md](DELIVERABLES.md) |
+
 ## Setup
 
 ### 1. Clone and install
