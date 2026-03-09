@@ -121,10 +121,18 @@ elif input_mode == "Image":
 
 elif input_mode == "Audio":
     audio_source = st.radio("Audio source", ["Record from microphone", "Upload audio file"], horizontal=True, key="audio_src")
+    if st.button("New question (clear transcript & record/upload again)", key="audio_new_q"):
+        for k in ("_asr_mic_id", "_asr_file_id", "_asr_file", "_asr_text", "_asr_conf"):
+            st.session_state.pop(k, None)
+        st.session_state.result = None
+        st.session_state.trace = []
+        st.session_state._audio_rec_key = st.session_state.get("_audio_rec_key", 0) + 1
+        st.rerun()
     if audio_source == "Record from microphone":
         try:
             from st_audiorec import st_audiorec
-            wav_bytes = st_audiorec()
+            rec_key = st.session_state.get("_audio_rec_key", 0)
+            wav_bytes = st_audiorec(key=f"audiorec_{rec_key}")
             if wav_bytes and isinstance(wav_bytes, bytes) and len(wav_bytes) >= 44:
                 mic_id = hash(wav_bytes)
                 if st.session_state.get("_asr_mic_id") != mic_id:
@@ -143,7 +151,7 @@ elif input_mode == "Audio":
         except Exception as e:
             st.warning(f"Mic recording not available: {e}. Install: pip install streamlit-audiorec")
     else:
-        uploaded_audio = st.file_uploader("Upload audio (e.g. MP3, WAV)", type=["mp3", "wav", "m4a", "ogg", "webm"])
+        uploaded_audio = st.file_uploader("Upload audio (e.g. MP3, WAV)", type=["mp3", "wav", "m4a", "ogg", "webm"], key="audio_upload")
         if uploaded_audio:
             file_id = (uploaded_audio.name, uploaded_audio.size)
             if st.session_state.get("_asr_file_id") != file_id:
@@ -154,6 +162,12 @@ elif input_mode == "Audio":
                 st.session_state._asr_file = uploaded_audio.name
                 st.session_state._asr_text = asr_text or ""
                 st.session_state._asr_conf = asr_conf_val
+                st.session_state.result = None
+                st.session_state.trace = []
+        else:
+            if "_asr_file_id" in st.session_state or "_asr_text" in st.session_state:
+                for k in ("_asr_file_id", "_asr_file", "_asr_text", "_asr_conf"):
+                    st.session_state.pop(k, None)
                 st.session_state.result = None
                 st.session_state.trace = []
 
