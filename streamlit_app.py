@@ -126,13 +126,11 @@ elif input_mode == "Audio":
             st.session_state.pop(k, None)
         st.session_state.result = None
         st.session_state.trace = []
-        st.session_state._audio_rec_key = st.session_state.get("_audio_rec_key", 0) + 1
         st.rerun()
     if audio_source == "Record from microphone":
         try:
             from st_audiorec import st_audiorec
-            rec_key = st.session_state.get("_audio_rec_key", 0)
-            wav_bytes = st_audiorec(key=f"audiorec_{rec_key}")
+            wav_bytes = st_audiorec()
             if wav_bytes and isinstance(wav_bytes, bytes) and len(wav_bytes) >= 44:
                 mic_id = hash(wav_bytes)
                 if st.session_state.get("_asr_mic_id") != mic_id:
