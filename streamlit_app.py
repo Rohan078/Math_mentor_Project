@@ -99,11 +99,15 @@ elif input_mode == "Image":
             st.session_state._ocr_file = uploaded.name
             st.session_state._ocr_text = ocr_text or ""
             st.session_state._ocr_conf = ocr_conf_val
+            st.session_state.result = None
+            st.session_state.trace = []
         st.image(uploaded, use_container_width=True, caption="Uploaded image")
     else:
         if "_ocr_file_id" in st.session_state:
             for k in ("_ocr_file_id", "_ocr_file", "_ocr_text", "_ocr_conf"):
                 st.session_state.pop(k, None)
+            st.session_state.result = None
+            st.session_state.trace = []
 
     if st.session_state.get("_ocr_text") is not None:
         ocr_conf = st.session_state.get("_ocr_conf", 1.0)
@@ -122,13 +126,18 @@ elif input_mode == "Audio":
             from st_audiorec import st_audiorec
             wav_bytes = st_audiorec()
             if wav_bytes and isinstance(wav_bytes, bytes) and len(wav_bytes) >= 44:
-                mic_path = DATA_DIR / "mic_recording.wav"
-                mic_path.write_bytes(wav_bytes)
-                with st.spinner("Transcribing..."):
-                    asr_text, asr_conf_val = transcribe_audio(mic_path)
-                st.session_state._asr_file = "mic"
-                st.session_state._asr_text = asr_text or ""
-                st.session_state._asr_conf = asr_conf_val
+                mic_id = hash(wav_bytes)
+                if st.session_state.get("_asr_mic_id") != mic_id:
+                    mic_path = DATA_DIR / "mic_recording.wav"
+                    mic_path.write_bytes(wav_bytes)
+                    with st.spinner("Transcribing..."):
+                        asr_text, asr_conf_val = transcribe_audio(mic_path)
+                    st.session_state._asr_mic_id = mic_id
+                    st.session_state._asr_file = "mic"
+                    st.session_state._asr_text = asr_text or ""
+                    st.session_state._asr_conf = asr_conf_val
+                    st.session_state.result = None
+                    st.session_state.trace = []
             elif wav_bytes is not None and (not isinstance(wav_bytes, bytes) or len(wav_bytes) < 44):
                 st.warning("Recording too short or invalid. Record at least 1–2 seconds of speech, then stop.")
         except Exception as e:
@@ -145,6 +154,8 @@ elif input_mode == "Audio":
                 st.session_state._asr_file = uploaded_audio.name
                 st.session_state._asr_text = asr_text or ""
                 st.session_state._asr_conf = asr_conf_val
+                st.session_state.result = None
+                st.session_state.trace = []
 
     if st.session_state.get("_asr_text") is not None:
         asr_conf = st.session_state.get("_asr_conf", 1.0)
