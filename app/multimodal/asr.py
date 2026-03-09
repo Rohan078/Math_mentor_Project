@@ -83,6 +83,15 @@ def _normalize_math_phrases(s: str) -> str:
     s = s.replace(" multiplied by ", " * ")
     s = s.replace(" plus ", " + ")
     s = s.replace(" minus ", " - ")
+    s = s.replace(" integral ", " ∫ ")
+    s = s.replace(" summation ", " Σ ")
+    s = s.replace(" product ", " Π ")
+    s = s.replace(" derivative ", " ′ ")
+    s = s.replace(" quotient ", " / ")
+    s = s.replace(" logarithm ", " log ")
+    s = s.replace(" exponential ", " exp ")
+    s = s.replace(" trigonometric ", " trig ")
+    s= s.replace("determinant", "det")
     return s
 
 
