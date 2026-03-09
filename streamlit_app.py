@@ -214,6 +214,7 @@ if st.button("Solve", type="primary") and raw_text:
             st.info("Please edit the extracted text above if needed, then click Solve again. Or confirm and proceed.")
             add_trace("HITL", hitl_reason)
 
+        # Memory at runtime: retrieve similar solved problems, reuse solution patterns, apply OCR/audio correction rules (no retraining)
         similar = retrieve_similar(parsed.problem_text, top_k=2)
         correction_rules = get_correction_rules(limit=10)
         if similar:

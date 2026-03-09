@@ -106,7 +106,7 @@ def retrieve_similar(problem_text: str, top_k: int = 3) -> list[dict]:
 
 
 def get_correction_rules(limit: int = 20) -> list[dict]:
-    """Past cases where user said incorrect and gave correction. Used so the solver can avoid repeating mistakes."""
+    """Past cases where user said incorrect and gave correction. Used at runtime to apply known OCR/audio correction rules and avoid repeating mistakes. No retraining — pattern reuse only."""
     mem_lines = _load_memory_lines()
     rules = []
     for r in mem_lines:
@@ -116,5 +116,6 @@ def get_correction_rules(limit: int = 20) -> list[dict]:
                 "original_answer": r.get("final_answer", ""),
                 "corrected_answer": r.get("corrected_answer"),
                 "user_comment": r.get("user_comment"),
+                "input_type": r.get("input_type", "text"),
             })
     return rules[-limit:]

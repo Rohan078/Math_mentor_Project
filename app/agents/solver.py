@@ -40,20 +40,22 @@ def _safe_python_calc(expr: str) -> str:
 
 
 def _format_memory_context(similar_sessions: Optional[List[dict]] = None, correction_rules: Optional[List[dict]] = None) -> str:
-    """Format similar past sessions and past corrections for the solver prompt."""
+    """Format similar past sessions and OCR/audio correction rules for runtime pattern reuse (no retraining)."""
     parts = []
     if correction_rules:
-        parts.append("Past corrections (user said the model was wrong; use these to avoid repeating mistakes):")
-        for i, r in enumerate(correction_rules[-5:], 1):
+        parts.append("Known correction rules (user said the model was wrong; apply these for similar problems, especially OCR/audio):")
+        for r in correction_rules[-5:]:
             snippet = (r.get("problem_snippet") or "").strip() or "(similar problem)"
             orig = r.get("original_answer") or ""
             corr = r.get("corrected_answer") or ""
             comment = r.get("user_comment") or ""
-            line = f"- Problem like: \"{snippet[:120]}...\". Model had said: {orig[:80]}. Correct answer: {corr[:80]}." + (f" User note: {comment[:60]}." if comment else "")
+            src = r.get("input_type", "text")
+            ocr_audio = " [from image/audio — apply for similar OCR/ASR input]" if src in ("image", "audio") else ""
+            line = f"- Problem like: \"{snippet[:120]}...\". Model had said: {orig[:80]}. Correct answer: {corr[:80]}." + (f" User note: {comment[:60]}." if comment else "") + ocr_audio
             parts.append(line)
         parts.append("")
     if similar_sessions:
-        parts.append("Similar past problems (for reference; match method and style when appropriate):")
+        parts.append("Similar past problems (reuse solution pattern and style when appropriate):")
         for s in similar_sessions[:3]:
             pt = (s.get("parsed_question") or {}).get("problem_text", "")[:150]
             ans = s.get("final_answer", "")[:100]
@@ -96,7 +98,7 @@ Provide:
 If you need to compute a number, you can output a line like: CALC: <expression> and the system will substitute the result. Otherwise solve symbolically."""
 
     response = chat([
-        {"role": "system", "content": "You are a precise math tutor. Give correct, step-by-step solutions. Use the retrieved context only when it applies; do not invent citations. When past corrections or similar problems are provided, avoid repeating past mistakes and align with user-corrected answers when the problem is similar."},
+        {"role": "system", "content": "You are a precise math tutor. Give correct, step-by-step solutions. Use the retrieved context only when it applies; do not invent citations. Use memory at runtime: reuse solution patterns from similar past problems, and apply known OCR/audio correction rules when the problem is similar (especially when current input was from image or speech). No retraining — pattern reuse only."},
         {"role": "user", "content": user_msg},
     ])
 
