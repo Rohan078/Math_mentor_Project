@@ -72,43 +72,7 @@ flowchart TB
 | **HITL** | Triggered on low OCR/ASR/verifier confidence or parser ambiguity; user can approve/edit. |
 | **Memory** | Stores sessions (input, parsed, context, answer, feedback). Retrieves similar problems for reuse. |
 
-## Data flow (simplified)
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant UI as Streamlit UI
-    participant OCR
-    participant Parser
-    participant RAG
-    participant Solver
-    participant Verifier
-    participant Explainer
-    participant Memory
-
-    User->>UI: Image / Audio / Text
-    UI->>OCR: extract (if image/audio)
-    OCR-->>UI: raw text + confidence
-    alt Low confidence
-        UI->>User: HITL: edit or confirm
-    end
-    UI->>Parser: parse_problem(raw)
-    Parser-->>UI: ParsedProblem
-    UI->>RAG: retrieve(problem_text)
-    RAG-->>UI: chunks
-    UI->>Solver: solve(parsed, intent, chunks)
-    Solver-->>UI: answer, steps
-    UI->>Verifier: verify(parsed, solver_result)
-    Verifier-->>UI: is_correct, confidence, hitl_required
-    alt HITL required
-        UI->>User: Confirm or correct answer
-    end
-    UI->>Explainer: explain(parsed, solver_result)
-    Explainer-->>UI: explanation
-    UI->>User: Answer + explanation
-    UI->>Memory: store(session)
-    Memory->>Memory: retrieve_similar(problem) for future
-```
 
 ## Repo layout
 
