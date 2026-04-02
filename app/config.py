@@ -19,8 +19,8 @@ if _raw_key:
     GROQ_API_KEY = _key.strip()
 else:
     GROQ_API_KEY = ""
-GROQ_CHAT_MODEL = os.getenv("GROQ_CHAT_MODEL", "meta-llama/llama-4-maverick-17b-128e-instruct")
-GROQ_VISION_MODEL = os.getenv("GROQ_VISION_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
+GROQ_CHAT_MODEL = os.getenv("GROQ_CHAT_MODEL", "llama-3.3-70b-versatile")
+GROQ_VISION_MODEL = os.getenv("GROQ_VISION_MODEL", "llama-3.3-70b-versatile")
 GROQ_EMBEDDING_MODEL = "nomic-embed-text-v1.5"
 
 RAG_TOP_K = 5

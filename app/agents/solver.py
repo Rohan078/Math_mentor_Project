@@ -17,7 +17,7 @@ class SolverResult:
 
 
 def _safe_python_calc(expr: str) -> str:
-    """Safely evaluate a simple numeric/math expression. Returns result or error string."""
+    """Safely evaluate a s imple numeric/math expression. Returns result or error string."""
     import math
     allowed = set("0123456789.+-*/().%e ^")
     expr_clean = expr.replace("**", "^").replace(" ", "")

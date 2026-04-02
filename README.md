@@ -15,8 +15,7 @@ JEE-style math mentor: **Algebra**, **Probability**, **Calculus**, **Linear alge
 
 | Item | Link |
 |------|------|
-| **Live app** | _Add your Streamlit Cloud URL_ |
-| **Demo video (3–5 min)** | _Add YouTube / Loom link: image → solution, audio → solution, HITL, memory reuse_ |
+| **Live app** | https://mathmentoragent.streamlit.app/ |
 | **Architecture** | [ARCHITECTURE.md](ARCHITECTURE.md) (Mermaid diagrams) |
 | **Evaluation** | [EVALUATION.md](EVALUATION.md) |
 | **Checklist** | [DELIVERABLES.md](DELIVERABLES.md) |
